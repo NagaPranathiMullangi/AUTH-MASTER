@@ -1,0 +1,175 @@
+[
+    {
+      "id": 1,
+      "title": "bcrypt + JWT",
+      "image1": "src/assets/bcrypt.jpeg",
+     
+      "Auth": "Authentication is preformed by bcrypt",
+      "Session": "Session management via JWT tokens(stateless)",
+      "type": "jwt",
+      "tech": ["bcrypt", "jwt"],
+      "pros": [
+        " bcrypt secures passwords (storage), JWT secures sessions (authentication). Covers both major attack vectors: stolen DB and hijacked sessions.",
+        " bcrypt ensures passwords are never stored or transmitted in plaintext.Only hashed versions are compared.",
+        "JWT allows you to scale easily (no server-side session tracking needed).Works well in microservices or multi-server apps.",
+        "  bcrypt verifies quickly with a secure hash.JWT provides instant verification without DB lookup (after initial login).",
+        "JWTs are easily usable in React, Angular, Flutter, etc.Works across web and mobile platforms seamlessly."
+      ],
+      "cons": [
+        " JWTs can't be invalidated easily before expiration (no built-in logout).You need to implement token blacklists manually.",
+        "bcrypt needs proper salt rounds.JWTs need secure secret keys and proper expiration handling. One misstep weakens the whole flow.",
+        "JWTs expire and require separate refresh tokens.Adds complexity if you want long sessions without re-login.",
+        "JWTs in localStorage are vulnerable to XSS.JWTs in cookies need CSRF protection.",
+        "bcrypt hashing can be computationally heavy, especially with high traffic.Login servers may need load balancing under scale."
+      ]
+    },
+
+
+    {
+        "id": 2,
+        "title": "bcrypt + Express-session",
+        "image1": "src/assets/bcrypt.jpeg",
+       
+        "Auth": "Authentication is preformed by bcrypt",
+        "Session": "Session is stored on server using cookies (stateful).",
+        "type": "express-seesion",
+        "pros": [
+          "bcrypt securely hashes passwords with salt, making it resistant to brute-force and rainbow table attacks.",
+          "Express sessions store session data server-side, so the client doesn't need to manage JWTs or refresh tokens.",
+          "Sessions can expire automatically after inactivity, improving security with minimal setup.",
+          "With sessions, once logged in, the user stays authenticated via a cookie—no need to include a token in every request.",
+          "You can manually destroy sessions on logout or from the admin side (like banning users), giving you full control."
+        ],
+        "cons": [
+          "Express sessions are stored in memory by default. Without a session store (like Redis), they don’t scale well across servers.",
+          "Since sessions are maintained server-side, many concurrent users can consume significant memory.",
+          "Production environments require setting up and managing a database like Redis or MongoDB for session persistence.",
+          "Unlike JWTs, sessions aren't easily used in mobile apps or third-party APIs without sharing cookies and managing CORS properly.",
+          "If secure cookie settings (e.g., httpOnly, secure, sameSite) aren't properly configured, sessions can be stolen via XSS or CSRF."
+        ]
+      },
+
+
+      {
+        "id": 3,
+        "title": " OAuth (e.g., Google) + JWT",
+        "image1": "src/assets/google.png",
+       
+        "Auth": "User logs in via Google (OAuth).",
+        "Session": "JWT is created and stored in browser.",
+        "type": "JWT",
+        "pros": [
+          "OAuth enables users to log in using providers like Google, GitHub, etc., and JWT lets you maintain that identity securely across your app.",
+
+          "JWTs work seamlessly in web, mobile, and API clients—once issued by OAuth, they can be stored and used anywhere securely.",
+          "JWTs don't require server-side sessions—once issued, they can be verified quickly without querying a database or store.",
+          "JWTs are self-contained; you can decode and read claims (like email, roles, exp time) without contacting the auth provider.",
+          "JWTs work great in distributed systems—each service can independently verify the token using the OAuth provider's public key."
+        ],
+        "cons": [
+          "Integrating OAuth flows (especially refresh tokens, scopes, consent screens) with JWT issuance adds complexity to your app.",
+          "JWTs are stateless and can't be revoked once issued unless you implement a token blacklist or rotate signing keys.",
+          "If a JWT is stolen, it can be used until it expires—extra care must be taken to store tokens securely (e.g., httpOnly cookies).",
+          "OAuth and JWT usage must be done over secure connections (HTTPS), or you risk leaking access tokens and personal info.",
+          "Managing short-lived access tokens and long-lived refresh tokens can lead to bugs or poor UX if not handled carefully."
+        ]
+      },
+
+      {
+        "id": 4,
+        "title": "  OAuth (e.g., Google) + Express-session",
+        "image1": "src/assets/google.png",
+       
+        "Auth": "User logs in via Google (OAuth).",
+        "Session": "Server stores the session using cookies(express session).",
+        "type": "express-session",
+        "pros": [
+          "OAuth handles secure third-party login (like Google), while sessions store data securely on the server.",
+          "OAuth lets users log in with Google/GitHub, so you don’t manage passwords.Express sessions keep track of user state after login.",
+          "You can destroy a session on logout or if suspicious activity occurs — instantly cutting access.This is harder with pure JWTs.",
+          "Session-based auth allows middleware checks like req.session.user, which is easy to manage inside Express routes.",
+          "Combining OAuth + sessions gives flexibility: OAuth for auth, sessions for app-level state (like shopping cart, roles, etc.)."
+        ],
+        "cons": [
+          "Express sessions require a shared store (like Redis) to work across multiple servers or containers (in microservices).",
+          "You must maintain a session store (memory, Redis, etc.), increasing complexity and cost.",
+          "If session IDs are not stored securely (e.g., not using httpOnly and secure cookies), attackers could hijack sessions.",
+          "Each request may involve session store lookup, which adds latency — especially if Redis/DB is slow or networked.",
+          "Setting up OAuth flows (with redirects, tokens) plus Express sessions (with cookie management and storage) increases initial development time."
+        ]
+      },
+
+      {
+        "id": 5,
+        "title": "  Firebase Auth",
+        "image1": "src/assets/firebase.png",
+       
+        "Auth": "Handled by Firebase",
+        "Session": "Firebase manages token and session automatically.",
+        "type": "firebase",
+        "pros": [
+          "Firebase securely handles password hashing, storage, and login attempts (with brute-force protection), so you don’t have to implement it.",
+          "Just a few lines of code can handle sign-up, login, password reset, etc. Firebase takes care of the backend logic.",
+          "Works seamlessly with Firestore, Realtime DB, Cloud Functions, and Firebase Hosting — no need for manual user ID linking.",
+          "Firebase offers built-in functions to send email verification and password reset emails with a simple function call.",
+          "Firebase Auth works on Android, iOS, and Web with the same account credentials."
+        ],
+        "cons": [
+          "You don't have direct access to hashed passwords or full control over auth — not ideal for custom login logic.",
+          "Switching away from Firebase means you’ll have to migrate your auth system and possibly all users’ credentials.",
+          "You can’t fully customize password rules or email templates beyond what's provided in the Firebase Console.",
+          "Features like multi-tenancy, complex roles/permissions, and SSO (single sign-on) are limited or require Firebase’s paid tiers.",
+          "Too many login attempts or verification emails can get blocked if you're on Firebase’s free Spark plan."
+        ]
+      },
+
+      {
+        "id": 6,
+        "title": " Phone Number + JWT ",
+        "image1": "src/assets/otp1.png",
+       
+        "Auth": "OTP sent to phone for login.",
+        "Session": "JWT is created after verification.",
+        "type": "   JWT",
+        "pros": [
+          "Users don’t need to remember passwords; OTP-based login is user-friendly and faster for mobile-first users.",
+          "Once logged in, JWTs eliminate the need for server-side sessions. This makes your backend more scalable under load.",
+          "After OTP login, JWTs allow quick user verification on protected routes without querying the database every time.",
+          "Useful in regions where users may not have emails or find it hard to remember credentials — mobile number is enough.",
+          "Works well with providers like Twilio, Firebase, or other SMS gateways — flexible implementation."
+        ],
+        "cons": [
+          "SMS delivery can be delayed or fail due to network issues, Do Not Disturb (DND) settings, or SMS gateway failures.",
+          "Each OTP sent via SMS costs money (compared to free email/password systems), making it expensive at scale.",
+          "If JWTs have long expiry times or are not revoked on logout, unauthorized access is possible.",
+          "If you force OTP login every time (without refresh tokens), it can be frustrating for users to keep entering OTPs.",
+          "Phone numbers can be reassigned or SIM-swapped, potentially giving access to a different user."
+        ]
+      },
+
+      {
+        "id": 7,
+        "title": " Phone Number + Express-session",
+        "image1": "src/assets/otp1.png",
+       
+        "Auth": "OTP verifies phone number.",
+        "Session": "Session is stored in cookies on server..",
+        "type": "express-session   ",
+        "pros": [
+          "Express sessions are stored server-side (e.g., in memory, Redis, etc.), reducing the risk of token misuse compared to client-stored JWTs.",
+          "Phone number + OTP login eliminates the need for remembering passwords — simple for users, especially on mobile.",
+          "You can revoke or expire sessions instantly from the server without relying on token expiry.",
+          " No need to manage signing, verifying, or refreshing JWTs — everything is session-based and handled internally.",
+          "Session-based authentication is useful for high-security apps where tighter server-side access control is needed."
+        ],
+        "cons": [
+          "Sessions are stored server-side (in memory or external store), which can consume memory and affect scalability.",
+          "Unlike JWT, Express sessions require persistent storage (e.g., Redis), making scaling across multiple servers more complex.",
+          "Sending OTPs via SMS repeatedly incurs extra costs — especially if users request OTPs frequently.",
+          "If session management isn’t configured properly (timeouts, cleanup), stale sessions may accumulate or cause unexpected logouts.",
+          "Sessions are browser- or device-specific. If the same user logs in on another device, it requires a new OTP and session, limiting seamless cross-device experience."
+        ]
+      }
+      
+
+]

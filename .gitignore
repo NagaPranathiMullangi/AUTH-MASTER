@@ -1,0 +1,13 @@
+client/node_modules
+server/node_modules
+
+client/src/fbhelper.js
+
+server/config
+
+
+
+server/localhost.crt
+server/localhost.key
+
+server/.env
