@@ -7,7 +7,7 @@ function LoginBox1({ id }) {
   const navigate = useNavigate();
   const loginPath = id === "1" ? '/login1/jwt' : '/login1/express';
   const [success, setSuccess] = useState(false);
-
+console.log(id);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -16,6 +16,8 @@ function LoginBox1({ id }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+    
+      console.log(loginPath);
       const res = await axios.post(
         `http://mytestapp.com:5000${loginPath}`,
         { email, password },

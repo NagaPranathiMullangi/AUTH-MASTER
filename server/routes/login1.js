@@ -7,6 +7,7 @@ const generateToken = require('../utils/generateToken');
 
 // 🔸 /login1/jwt → JWT Login
 router.post('/jwt', async (req, res) => {
+  console.log('jwt backend');
   const { email, password } = req.body;
 
   const { error, user } = await verifyUser(email, password);
@@ -34,7 +35,7 @@ router.post('/express', async (req, res) => {
   if (error) return res.status(400).json({ message: error });
 
   req.session.userId = user._id;
-console.log(`came to expreess login${user}`);
+
   const expiry = Date.now() + 24 * 60 * 60 * 1000;
 
 

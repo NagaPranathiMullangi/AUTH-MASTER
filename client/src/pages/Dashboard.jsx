@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { auth } from '../fbhelper'; // Your Firebase config helper
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -20,18 +19,25 @@ function Dashboard() {
 
     const checkAllLogins = async () => {
       try {
+        console.log("🔍 Checking login methods...");
+
         // 1️⃣ JWT Check
         const jwtToken = localStorage.getItem('token');
         if (jwtToken) {
-          const res = await axios.get('http://mytestapp.com:5000/api/verify/jwt', {
-            headers: { Authorization: `Bearer ${jwtToken}` },
-            withCredentials: true
-          });
+          try {
+            const res = await axios.get('http://mytestapp.com:5000/api/verify/jwt', {
+              headers: { Authorization: `Bearer ${jwtToken}` },
+              withCredentials: true
+            });
 
-          if (res.data.success) {
-            setUser(res.data.user);
-            setLoading(false);
-            return;
+            if (res.data.success) {
+              console.log("✅ JWT Auth Passed");
+              setUser(res.data.user);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.warn("❌ JWT Auth Failed");
           }
         }
 
@@ -39,41 +45,44 @@ function Dashboard() {
         const session = JSON.parse(localStorage.getItem('sessionUser'));
         const userID = session?.userID;
         if (userID) {
-          const sessionRes = await axios.get(`http://mytestapp.com:5000/api/verify/express?userID=${userID}`, {
-            withCredentials: true
-          });
+          try {
+            const sessionRes = await axios.get(`http://mytestapp.com:5000/api/verify/express?userID=${userID}`, {
+              withCredentials: true
+            });
 
-          if (sessionRes.data.success) {
-            setUser(sessionRes.data.user);
-            setLoading(false);
-            return;
+            if (sessionRes.data.success) {
+              console.log("✅ Express Session Auth Passed");
+              setUser(sessionRes.data.user);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.warn("❌ Express Session Auth Failed");
           }
         }
 
         // 3️⃣ Firebase Auth + Firestore Check
         unsubscribe = onAuthStateChanged(firebaseAuth, async (fbUser) => {
-          console.log("🔥 Firebase User:", fbUser);
-
           if (fbUser) {
+            console.log("✅ Firebase User Logged In");
+
             try {
-              const db = getFirestore(); // initialize Firestore
-              const docRef = doc(db, "users", fbUser.uid); // point to users/{uid}
+              const db = getFirestore();
+              const docRef = doc(db, "users", fbUser.uid);
               const docSnap = await getDoc(docRef);
 
               let extraData = {};
               if (docSnap.exists()) {
-                extraData = docSnap.data(); // fetch phone, full name, etc.
+                extraData = docSnap.data();
               }
-              console.log(fbUser.photoURL);
 
               setUser({
                 name: fbUser.displayName || extraData.name || null,
                 email: fbUser.email,
                 photo: fbUser.photoURL || extraData.photo || null,
                 uid: fbUser.uid,
-                phone: extraData.phone || null, // from Firestore
+                phone: extraData.phone || null,
               });
-
             } catch (error) {
               console.error("⚠️ Error fetching Firestore data:", error);
               setUser({
@@ -84,9 +93,9 @@ function Dashboard() {
               });
             }
           } else {
+            console.warn("❌ Firebase: No user logged in");
             setUser(null);
           }
-
           setLoading(false);
         });
 
@@ -99,11 +108,16 @@ function Dashboard() {
 
     checkAllLogins();
 
-    // 🔁 Cleanup listener on unmount
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // 🔁 Optional logs to debug
+  useEffect(() => {
+    console.log("🔄 Loading:", loading);
+    console.log("👤 User:", user);
+  }, [loading, user]);
 
   if (loading) {
     return <div className="p-5 text-center text-gray-500">🔄 Checking login...</div>;
@@ -115,7 +129,7 @@ function Dashboard() {
         {user ? (
           <>
             <img
-              src={user.photo ||"https://www.kindpng.com/picc/m/22-223965_no-profile-picture-icon-circle-member-icon-png.png"}
+              src={user.photo || "https://www.kindpng.com/picc/m/22-223965_no-profile-picture-icon-circle-member-icon-png.png"}
               alt="User"
               className="mx-auto rounded-full w-20 h-20 object-cover mb-3"
             />

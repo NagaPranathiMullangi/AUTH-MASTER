@@ -1,6 +1,6 @@
 [
     {
-      "id": 1,
+      "id": "1",
       "title": "bcrypt + JWT",
       "image1": "src/assets/bcrypt.jpeg",
      
@@ -26,7 +26,7 @@
 
 
     {
-        "id": 2,
+        "id": "2",
         "title": "bcrypt + Express-session",
         "image1": "src/assets/bcrypt.jpeg",
        
@@ -51,7 +51,7 @@
 
 
       {
-        "id": 3,
+        "id": "3",
         "title": " OAuth (e.g., Google) + JWT",
         "image1": "src/assets/google.png",
        
@@ -76,7 +76,7 @@
       },
 
       {
-        "id": 4,
+        "id": "4",
         "title": "  OAuth (e.g., Google) + Express-session",
         "image1": "src/assets/google.png",
        
@@ -100,7 +100,7 @@
       },
 
       {
-        "id": 5,
+        "id": "5",
         "title": "  Firebase Auth",
         "image1": "src/assets/firebase.png",
        
@@ -124,7 +124,7 @@
       },
 
       {
-        "id": 6,
+        "id": "6",
         "title": " Phone Number + JWT ",
         "image1": "src/assets/otp1.png",
        
@@ -148,7 +148,7 @@
       },
 
       {
-        "id": 7,
+        "id": "7",
         "title": " Phone Number + Express-session",
         "image1": "src/assets/otp1.png",
        
